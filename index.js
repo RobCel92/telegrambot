@@ -47,8 +47,8 @@ bot.on('new_chat_members', async (ctx) => {
         const messageListener = async (nextMessageCtx) => {
             if (nextMessageCtx.chat.id === chatId) {
                 const senderUsername = nextMessageCtx.from.username;
-
-                // Check if the sender is a bot or an admin
+                
+                // Check if the sender is a bot and if it has special characters or is an admin
                 const isBot = nextMessageCtx.from.is_bot;  // Check if the user is a bot
                 const isAdmin = nextMessageCtx.from.is_admin;  // Check if the user is an admin
                 const botUsernames = ['SafeguardRobot', 'MissRose_bot']; // Add any additional bot usernames here
@@ -56,10 +56,10 @@ bot.on('new_chat_members', async (ctx) => {
                 // Check for both bot username and if it’s an admin
                 if (isBot && (botUsernames.includes(senderUsername) || isAdmin)) {
                     try {
-                        await nextMessageCtx.delete();
-                        console.log('Deleted the next message from a bot/admin.');
+                        await nextMessageCtx.delete();  // Attempt to delete the message
+                        console.log(`Deleted the next message from bot: ${senderUsername}.`);
                     } catch (error) {
-                        console.error('Failed to delete the message:', error);
+                        console.error(`Failed to delete the message from ${senderUsername}:`, error);
                     }
                     // Unregister this listener after processing the next message
                     bot.off('message', messageListener);
