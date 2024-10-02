@@ -40,28 +40,35 @@ bot.on('new_chat_members', async (ctx) => {
             console.error('Failed to delete the join message:', error);
         }
 
-        // Set a one-time listener for the next message from specific users
+        // Check for the next message from specific bots or admins
         const chatId = ctx.chat.id;
 
-        const nextMessageHandler = async (nextMessageCtx) => {
+        // Use a listener for the next message
+        const messageListener = async (nextMessageCtx) => {
             if (nextMessageCtx.chat.id === chatId) {
                 const senderUsername = nextMessageCtx.from.username;
 
-                if (senderUsername === 'SafeguardRobot' || senderUsername === 'MissRose_bot' || nextMessageCtx.from.is_admin) {
+                // Check if the sender is a bot or an admin
+                const isBot = nextMessageCtx.from.is_bot;  // Check if the user is a bot
+                const isAdmin = nextMessageCtx.from.is_admin;  // Check if the user is an admin
+                const botUsernames = ['SafeguardRobot', 'MissRose_bot']; // Add any additional bot usernames here
+
+                // Check for both bot username and if it’s an admin
+                if (isBot && (botUsernames.includes(senderUsername) || isAdmin)) {
                     try {
-                        await nextMessageCtx.delete(); // Delete the next message
+                        await nextMessageCtx.delete();
                         console.log('Deleted the next message from a bot/admin.');
                     } catch (error) {
                         console.error('Failed to delete the message:', error);
                     }
                     // Unregister this listener after processing the next message
-                    bot.off('message', nextMessageHandler);
+                    bot.off('message', messageListener);
                 }
             }
         };
 
-        // Register the one-time listener for the next message
-        bot.on('message', nextMessageHandler);
+        // Register the message listener
+        bot.on('message', messageListener);
     }
 });
 
