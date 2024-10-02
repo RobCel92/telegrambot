@@ -40,26 +40,28 @@ bot.on('new_chat_members', async (ctx) => {
             console.error('Failed to delete the join message:', error);
         }
 
-        // Check for the next message from @SafeguardRobot or @MissRose_bot
+        // Set a one-time listener for the next message from specific users
         const chatId = ctx.chat.id;
 
-        // Use a listener for the next message
-        bot.on('message', async (nextMessageCtx) => {
+        const nextMessageHandler = async (nextMessageCtx) => {
             if (nextMessageCtx.chat.id === chatId) {
                 const senderUsername = nextMessageCtx.from.username;
 
                 if (senderUsername === 'SafeguardRobot' || senderUsername === 'MissRose_bot' || nextMessageCtx.from.is_admin) {
                     try {
-                        await nextMessageCtx.delete();
+                        await nextMessageCtx.delete(); // Delete the next message
                         console.log('Deleted the next message from a bot/admin.');
                     } catch (error) {
                         console.error('Failed to delete the message:', error);
                     }
                     // Unregister this listener after processing the next message
-                    bot.off('message');
+                    bot.off('message', nextMessageHandler);
                 }
             }
-        });
+        };
+
+        // Register the one-time listener for the next message
+        bot.on('message', nextMessageHandler);
     }
 });
 
